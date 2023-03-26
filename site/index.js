@@ -46,7 +46,7 @@ rosettes = [
 
 ]
 
-API_HOST = 'http://127.0.0.1:5500'
+API_HOST = 'http://trgou.online'
 
 let currentBoard = {};
 
@@ -104,7 +104,7 @@ function simplifyBoardModel(board) {
 
 
 async function fetchBoard() {
-  const response = await fetch(API_HOST);
+  const response = await fetch(`${API_HOST}/game-state`);
   const json = await response.json();
   return json;
 }
