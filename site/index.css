@@ -19,7 +19,7 @@
   width: 75px; height: 75px; margin: 3px; 
   border: solid 1px black;
   max-width: 12.5%; text-align: center;
-  display: inline-block;
+  display: flex;
   padding: auto;
 }
 
@@ -27,6 +27,22 @@
     background-repeat: no-repeat;
     background-size: contain;
     background-image: url(https://upload.wikimedia.org/wikipedia/commons/b/b5/Royal_Game_of_Ur_-_Roset%C3%B3n.jpg);
+}
+
+.piece {
+  width: 45px; height: 45px; margin: auto;
+  border: solid 1px black;
+  display: inline-block;
+  border-radius: 50%;
+  opacity: 0.75;
+}
+
+.red {
+  background-color: red;
+}
+
+.blue {
+  background-color: blue;
 }
 
 .square.white,

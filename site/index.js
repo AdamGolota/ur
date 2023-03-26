@@ -7,50 +7,140 @@ function DCE(val) {return document.createElement(val);}
 function DCTN(val) {return document.createTextNode(val);}
 function DPFS(val) {return new DOMParser().parseFromString(val, 'text/html');}
 
-piecePositions = {
-  'L1': 'Start',
-  'L2': 'Start',
-  'L3': 'Start',
-  'L4': 'L01',
-  'L5': 'C09',
-  'L6': 'Start',
-  'L7': 'Start',
-  'R1': 'Start',
-  'R2': 'Start',
-  'R3': 'Finish',
-  'R4': 'Start',
-  'R5': 'Start',
-  'R6': 'Start',
-  'R7': 'Start',
-}
+// piecePositions = {
+//   'L1': 'Start',
+//   'L2': 'Start',
+//   'L3': 'Start',
+//   'L4': 'L01',
+//   'L5': 'C09',
+//   'L6': 'Start',
+//   'L7': 'Start',
+//   'R1': 'Start',
+//   'R2': 'Start',
+//   'R3': 'Finish',
+//   'R4': 'Start',
+//   'R5': 'Start',
+//   'R6': 'Start',
+//   'R7': 'Start',
+// }
 
 boardModel = [
-  ['L14', 'C12', 'R14'],
-  ['L15', 'C13', 'R15'],
-  [       'C11',      ],
-  [       'C09',      ],
-  ['L01', 'C08', 'R01'],
-  ['L02', 'C07', 'R02'],
-  ['L03', 'C06', 'R03'],
   ['L04', 'C05', 'R04'],
+  ['L03', 'C06', 'R03'],
+  ['L02', 'C07', 'R02'],
+  ['L01', 'C08', 'R01'],
+  [       'C09',      ],
+  [       'C10',      ],
+  ['L14', 'C11', 'R14'],
+  ['L13', 'C12', 'R13'],
 ];
 
 rosettes = [
+  'L04',         'R04',
 
-   'L15',        'R15',
-
-
+  
           'C08',
 
 
-   'L04',        'R04',
+  'L14',         'R14',
+
 ]
 
-API_HOST = 'http://31.131.17.213:5000'
+API_HOST = 'http://127.0.0.1:5500'
 
-updateGameState = function() {
-  fetch(API_HOST)
+let currentBoard = {};
+
+updateBoard = async function(previousBoard) {
+  const board = simplifyBoardModel(await fetchBoard());
+  Object.entries(board).forEach(([square, state]) => {
+    if (state !== previousBoard[square]) {
+      updateSquare(square, state);
+    }
+  })
+  currentBoard = board;
 }
+
+updateSquare = function(square, state) {
+  const squareElement = document.querySelector(`.square[data-id="${square}"]`);
+  if (state === null) {
+    squareElement.innerHTML = '';
+  } else {
+    squareElement.innerHTML = templates.piece(state.player);
+  }
+}
+
+function simplifyBoardModel(board) {
+  positions = {}
+  board = Object.values(board);
+  board.slice(1, 5).forEach((position, index) => {
+    positions[`R0${index + 1}`] = position[0];
+    positions[`L0${index + 1}`] = position[1];
+  })
+  board.slice(5, 13).forEach((position, index) => {
+    commonPositionNumber = String(index + 5).padStart(2, '0');
+    positions[`C${commonPositionNumber}`] = position;
+  })
+  board.slice(13, 15).forEach((position, index) => {
+    positions[`R${index + 13}`] = position[0];
+    positions[`L${index + 13}`] = position[1];
+  })
+  return positions;
+}
+
+// formatSquareState = function(squareState) {
+//   if (squareState === null) {
+//     return null; 
+//   }
+//   return formatPiece(squareState)
+// }
+
+// formatPiece = function(piece) {
+//   return `${formatPiecePlayer(squareState.player)}${piece.id}`
+// }
+
+// formatPiecePlayer = function(piecePlayer) {
+//   return String(piecePlayer) === '0' ? 'L' : 'R';
+// }
+
+
+async function fetchBoard() {
+  const response = await fetch(API_HOST);
+  const json = await response.json();
+  return json;
+}
+
+
+createBoard = function() {
+  let board = document.querySelector('#board');
+  boardModel.forEach((row, index) => {
+    board.insertAdjacentHTML('beforeend', templates.row(index));
+    let rowElement = document.querySelector(`.row[data-row="${index}"]`);
+    row.forEach(square => {
+      rosettes.includes(square)
+        ? rowElement.insertAdjacentHTML('beforeend', templates.rosetteSquare(square))
+        : rowElement.insertAdjacentHTML('beforeend', templates.simpleSquare(square));
+    })
+  })
+}
+
+
+// Register Reusable Markup Templates as Method Functions and Using Argument Interpolation
+var templates = {
+  row: function(index) {
+    return `<div class="row" data-row="${index}"></div>`;
+  },
+  simpleSquare: function(id) {
+    return `<div class="square" data-id="${id}"></div>`;
+  },
+  rosetteSquare: function(id) {
+    return `<div class="square rosette" data-id="${id}"></div>`;
+  },
+  // Chess Piece
+  piece: function(player) {
+    let color = player === 'R' ? 'red' : 'blue';
+    return `<div class="piece ${color}"></div>`;
+  }
+};
 
 
 // Debug Mode
@@ -183,7 +273,7 @@ var listeners = {
 
 // Register Action Method Functions
 var actions = {
-  
+  // Create And/Or Clear the Chess Board
   consoleLog: function(arg1 = "", arg2 = "", lines = false) {
     if(debug_mode === true) {
       var d = new Date(); 
@@ -199,20 +289,6 @@ var actions = {
       console.log(log);
       //console.log(lines ? '-------' : '');
     }
-  },
-  
-  // Create And/Or Clear the Chess Board
-  createBoard: function() { actions.consoleLog("[ACTION] Create Board");
-    let board = document.querySelector('#board');
-    boardModel.forEach((row, index) => {
-      board.insertAdjacentHTML('beforeend', templates.row(index));
-      let rowElement = document.querySelector(`.row[data-row="${index}"]`);
-      row.forEach(square => {
-        rosettes.includes(square)
-          ? rowElement.insertAdjacentHTML('beforeend', templates.rosetteSquare(square))
-          : rowElement.insertAdjacentHTML('beforeend', templates.simpleSquare(square));
-      })
-    })
   },
   
   // Set the Pieces on the Chess Board
@@ -384,26 +460,8 @@ var actions = {
   }
 };
 
-// Register Reusable Markup Templates as Method Functions and Using Argument Interpolation
-var templates = {
-  row: function(index) {
-    return `<div class="row" data-row="${index}"></div>`;
-  },
-  simpleSquare: function(id) {
-    return `<div class="square" data-id="${id}"></div>`;
-  },
-  rosetteSquare: function(id) {
-    return `<div class="square rosette" data-id="${id}"></div>`;
-  },
-  // Chess Piece
-  piece: function(key, piece, color) {
-    let pcolor = color === "black" ? "white" : (color === "white" ? "black" : "");
-    return `<div class="chess-piece ${key}" data-piece="${key}" data-color="${pcolor}" data-piece-start="${piece.pos}" data-position="${piece.pos}"><i class="fa fa-${piece.icon} ${pcolor}" data-color="${pcolor}" data-piece="${piece.pos}"></i></div>`;
-  }
-};
-
 // INIT ACTION: Create the Chess Board
-actions.createBoard();
+createBoard();
 // INIT ACTION: Set the Chess Pieces on the Chess Board
 actions.setPieces(pieces);
 // INIT LISTENER: Select Pieces
@@ -412,3 +470,5 @@ listeners.selectPieces();
 listeners.selectSquares();
 // INIT LISTENER: Record Board
 //listeners.recordBoard();
+
+setInterval(() => updateBoard(currentBoard), 1000)
