@@ -46,9 +46,22 @@ rosettes = [
 
 ]
 
-API_HOST = 'http://trgou.online'
-
 let currentBoard = {};
+
+
+
+async function roll() {
+  const response = await fetch(`/roll`);
+  const result = await response.text();
+  drawRoll(result);
+}
+
+drawRoll = function(result) {
+  const rollElement = document.getElementById('roll-container');
+  rollElement.innerHTML = result;
+};
+
+document.getElementById('roll-button').addEventListener('click', roll);
 
 updateBoard = async function(previousBoard) {
   const board = simplifyBoardModel(await fetchBoard());
@@ -87,24 +100,8 @@ function simplifyBoardModel(board) {
   return positions;
 }
 
-// formatSquareState = function(squareState) {
-//   if (squareState === null) {
-//     return null; 
-//   }
-//   return formatPiece(squareState)
-// }
-
-// formatPiece = function(piece) {
-//   return `${formatPiecePlayer(squareState.player)}${piece.id}`
-// }
-
-// formatPiecePlayer = function(piecePlayer) {
-//   return String(piecePlayer) === '0' ? 'L' : 'R';
-// }
-
-
 async function fetchBoard() {
-  const response = await fetch(`${API_HOST}/game-state`);
+  const response = await fetch(`/game-state`);
   const json = await response.json();
   return json;
 }
@@ -219,8 +216,7 @@ var log = {
 }
 
 // Register Event Listener Method Functions to Bind the Actions to the Event Triggering Elements
-var listeners = {
-  
+var listeners = {  
   // Listen For When a Chess Piece is Clicked
   selectPieces: function() { actions.consoleLog("[LISTENER] Select Pieces");
     let pieces = document.querySelectorAll('.chess-piece');
