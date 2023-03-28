@@ -49,6 +49,23 @@ rosettes = [
 let currentBoard = {};
 
 
+async function movePiece(id) {
+  const response = await fetch(`/move-piece`, {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id })
+  });
+}
+
+async function placeNewPiece() {
+  const response = await fetch(`/place-new-piece`, {
+    method: 'POST',
+  });
+}
+
+document.getElementById('place-new-piece-button').addEventListener('click', placeNewPiece);
 
 async function roll() {
   const response = await fetch(`/roll`);
@@ -78,8 +95,14 @@ updateSquare = function(square, state) {
   if (state === null) {
     squareElement.innerHTML = '';
   } else {
-    squareElement.innerHTML = templates.piece(state.player);
+    placePiece(squareElement, piece=state)
   }
+}
+
+function placePiece(squareElement, piece) {
+  squareElement.innerHTML = templates.piece(piece.player, piece.id);
+  const pieceElement = squareElement.querySelector(`.piece[data-id="${piece.id}"]`);
+  pieceElement.addEventListener('click', () => movePiece(piece.id));
 }
 
 function simplifyBoardModel(board) {
@@ -133,9 +156,9 @@ var templates = {
     return `<div class="square rosette" data-id="${id}"></div>`;
   },
   // Chess Piece
-  piece: function(player) {
+  piece: function(player, id) {
     let color = player === 'R' ? 'red' : 'blue';
-    return `<div class="piece ${color}"></div>`;
+    return `<div class="piece ${color}" data-id="${id}"></div>`;
   }
 };
 
@@ -352,68 +375,6 @@ var actions = {
       actions.consoleLog("[ACTION] Select Piece", {piece: piece, origin: origin});
   },
   
-  // Select a Chess Square
-  selectSquare: function(e) {
-    
-    let square = e.target;
-    // let squarePiece = square.querySelector('.chess-piece').length > 0 ? square.querySelector('.chess-piece') : false;
-    let spIsSelected = square.classList.contains('square-selected');
-    let spIsCapturable = square.classList.contains('capturable-selected');
-    
-    //let square = e.target.classList.contains('chess-piece') ? e.target.parentNode : e.target;
-    let selectedPiece = document.querySelector('.piece-selected').querySelector('.chess-piece');
-    if(spIsSelected) {
-      if(selectedPiece.getAttribute('data-position') !== square.getAttribute('data-cell')) {
-        actions.movePiece(e);
-        actions.clearSquareSelectors();
-      }
-    } else {
-      actions.clearSquareSelectors();
-      square.classList.toggle('square-selected');
-    }
-    actions.consoleLog("[ACTION] Select Square", {e: e, square: square, piece: selectedPiece});
-  },
-  
-  // Move a Chess Piece from a Starting Square to an Ending Square
-  movePiece: function(e) {
-    e.preventDefault();
-    let newSquare = document.querySelector('.square-selected') !== null ? document.querySelector('.square-selected') : (document.querySelector('.capturable-selected') !== null ? document.querySelector('.capturable-selected') : false);
-    let oldSquare = document.querySelector('.piece-selected');
-    let piece = oldSquare.querySelector('.chess-piece');
-    let opponentPiece = newSquare.querySelector('.chess-piece') !== null ? newSquare.querySelector('.chess-piece') : false;
-    if(opponentPiece) {
-      actions.takePiece(opponentPiece);
-      //newSquare.removeChild(newSquare.childNodes[0]);
-    }
-    newSquare.appendChild(piece);
-    piece.setAttribute('data-position', newSquare.getAttribute('data-cell'));
-
-    actions.recordMove(oldSquare, newSquare, piece);
-    actions.clearPieceSelectors();
-    actions.clearSquareSelectors();
-    actions.clearCapturedSelectors();
-    actions.consoleLog("[ACTION] Move Piece", {e: e, newSquare: newSquare, oldSquare: oldSquare, piece: piece, opponentPiece: opponentPiece});
-  },
-  
-  // Record the Pieces on the Board into a JSON Object to Store
-  recordBoard: function() {
-    let record = {timestamp: Date.now(), board: []};
-    document.querySelectorAll('.square').forEach((square, i) => {
-      let blob = {};
-      let piece = square.querySelector('.chess-piece');
-      blob.squareColor = square.getAttribute('data-square-color');
-      blob.squareCell = square.getAttribute('data-cell');
-      if(piece) {
-        blob.pieceColor = piece.getAttribute('data-color');
-        blob.pieceKey = piece.getAttribute('data-piece');
-      }
-      blob.timestamp = Date.now();
-      record.board.push(blob);
-    });
-    game.push(record);
-    actions.consoleLog("[ACTION] Record Board", {game: game, record: record});
-  },
-  
   // Record A Chess Piece Move Once Completed
   recordMove: function(oldSquare, newSquare, piece) {
     let move = {timestamp: new Date().toString().split(' ')[4]};
@@ -458,13 +419,5 @@ var actions = {
 
 // INIT ACTION: Create the Chess Board
 createBoard();
-// INIT ACTION: Set the Chess Pieces on the Chess Board
-actions.setPieces(pieces);
-// INIT LISTENER: Select Pieces
-listeners.selectPieces();
-// INIT LISTENER: Select Squares
-listeners.selectSquares();
-// INIT LISTENER: Record Board
-//listeners.recordBoard();
 
 setInterval(() => updateBoard(currentBoard), 1000)
