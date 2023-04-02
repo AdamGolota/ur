@@ -157,7 +157,7 @@ var templates = {
   },
   // Chess Piece
   piece: function(player, id) {
-    let color = player === 'R' ? 'red' : 'blue';
+    let color = String(player) === '1' ? 'red' : 'blue';
     return `<div class="piece ${color}" data-id="${id}"></div>`;
   }
 };
