@@ -68,7 +68,7 @@ async function placeNewPiece() {
 document.getElementById('place-new-piece-button').addEventListener('click', placeNewPiece);
 
 async function roll() {
-  const response = await fetch(`/roll`);
+  const response = await fetch(`/roll`, { method: 'POST' });
   const result = await response.text();
   drawRoll(result);
 }
