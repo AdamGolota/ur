@@ -48,14 +48,20 @@ rosettes = [
 
 let currentBoard = {};
 
+async function startNewGame() {
+  await fetch(`/start-game`);
+  updateBoard(currentBoard);
+}
+
+document.getElementById('start-new-game-button').addEventListener('click', startNewGame);
 
 async function movePiece(id) {
   const response = await fetch(`/move-piece`, {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ id })
+    body: JSON.stringify({ piece_id: id })
   });
 }
 
@@ -83,11 +89,16 @@ document.getElementById('roll-button').addEventListener('click', roll);
 updateBoard = async function(previousBoard) {
   const board = simplifyBoardModel(await fetchBoard());
   Object.entries(board).forEach(([square, state]) => {
-    if (state !== previousBoard[square]) {
+    if (hasStateChanged(previousBoard[square], state)) {
       updateSquare(square, state);
     }
   })
   currentBoard = board;
+}
+
+hasStateChanged = function(oldState, newState) {
+  return (!newState && oldState)
+      || ( newState && (!oldState || oldState.id !== newState.id || oldState.player !== newState.player))
 }
 
 updateSquare = function(square, state) {
