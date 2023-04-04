@@ -55,13 +55,13 @@ async function startNewGame() {
 
 document.getElementById('start-new-game-button').addEventListener('click', startNewGame);
 
-async function movePiece(id) {
+async function movePiece(player, id) {
   const response = await fetch(`/move-piece`, {
     method: 'PUT',
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ piece_id: id })
+    body: JSON.stringify({ player, piece_id: id })
   });
 }
 
@@ -87,13 +87,14 @@ drawRoll = function(result) {
 document.getElementById('roll-button').addEventListener('click', roll);
 
 updateBoard = async function(previousBoard) {
-  const board = simplifyBoardModel(await fetchBoard());
-  Object.entries(board).forEach(([square, state]) => {
+  const { field: board } = await fetchGameState();
+  const simplifiedBoard = simplifyBoardModel(board);
+  Object.entries(simplifiedBoard).forEach(([square, state]) => {
     if (hasStateChanged(previousBoard[square], state)) {
       updateSquare(square, state);
     }
   })
-  currentBoard = board;
+  currentBoard = simplifiedBoard;
 }
 
 hasStateChanged = function(oldState, newState) {
@@ -113,7 +114,7 @@ updateSquare = function(square, state) {
 function placePiece(squareElement, piece) {
   squareElement.innerHTML = templates.piece(piece.player, piece.id);
   const pieceElement = squareElement.querySelector(`.piece[data-id="${piece.id}"]`);
-  pieceElement.addEventListener('click', () => movePiece(piece.id));
+  pieceElement.addEventListener('click', () => movePiece(piece.player, piece.id));
 }
 
 function simplifyBoardModel(board) {
@@ -134,8 +135,8 @@ function simplifyBoardModel(board) {
   return positions;
 }
 
-async function fetchBoard() {
-  const response = await fetch(`/game-state`);
+async function fetchGameState() {
+  const response = await fetch(`/game-state/v2`);
   const json = await response.json();
   return json;
 }
