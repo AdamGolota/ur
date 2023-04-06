@@ -13,8 +13,42 @@
   height: 100px;
 }
 
+.scores {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 50px;
+}
+
+.score-message {
+  display: inline-block;
+}
+
+.message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+}
+
+.win-message-text {
+  display: inline-block;
+}
+
+.move-message-text {
+  display: inline-block;
+}
+
 .buttons-container {
   float: left;
+}
+
+.message-red {
+  color: red;
+}
+
+.message-blue {
+  color: blue;
 }
 
 .row {
@@ -24,11 +58,11 @@
 }
 
 .square {
-width: 75px; height: 75px; margin: 3px; 
-border: solid 1px black;
-max-width: 12.5%; text-align: center;
-display: flex;
-padding: auto;
+  width: 75px; height: 75px; margin: 3px; 
+  border: solid 1px black;
+  max-width: 12.5%; text-align: center;
+  display: flex;
+  padding: auto;
 }
 
 .rosette {
@@ -45,16 +79,16 @@ padding: auto;
   opacity: 0.75;
 }
 
-.piece:hover {
+.piece.ative:hover {
   opacity: 1;
 }
 
-.red {
-background-color: red;
+.piece.red {
+  background-color: red;
 }
 
-.blue {
-background-color: blue;
+.piece.blue {
+  background-color: blue;
 }
 
 .button-3 {
