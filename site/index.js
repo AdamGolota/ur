@@ -120,9 +120,9 @@ getCurrentMessage = function(
   player1FinishedPieces,
   player2FinishedPieces,
 ) {
-  if (player1FinishedPieces === 7) {
+  if (Number(player1FinishedPieces) === 7) {
     return templates.winMessageText('0');
-  } else if (player2FinishedPieces === 7) {
+  } else if (Number(player2FinishedPieces) === 7) {
     return templates.winMessageText('1');
   } else {
     return templates.moveMessageText(currentPlayer);
