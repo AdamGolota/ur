@@ -49,7 +49,8 @@ rosettes = [
 let currentBoard = {};
 
 async function movePiece(player, id) {
-  const response = await fetch(`/move-piece`, {
+  const game_id = getGameId();
+  const response = await fetch(`/move-piece/${game_id}`, {
     method: 'PUT',
     headers: {
       "Content-Type": "application/json",
@@ -60,7 +61,8 @@ async function movePiece(player, id) {
 }
 
 async function placeNewPiece() {
-  const response = await fetch(`/place-new-piece`, {
+  const game_id = getGameId();
+  const response = await fetch(`/place-new-piece/${game_id}`, {
     method: 'POST',
   });
   updateBoard(currentBoard);
@@ -69,7 +71,8 @@ async function placeNewPiece() {
 document.getElementById('place-new-piece-button').addEventListener('click', placeNewPiece);
 
 async function roll() {
-  const response = await fetch(`/roll`, { method: 'POST' });
+  const id = getGameId();
+  const response = await fetch(`/roll/${id}`, { method: 'POST' });
   const { roll: result } = await response.json();
   drawRoll(result);
 }
@@ -168,9 +171,14 @@ function simplifyBoardModel(board) {
 }
 
 async function fetchGameState() {
-  const response = await fetch(`/game-state`);
+  const id = getGameId();
+  const response = await fetch(`/game-state/${id}`);
   const json = await response.json();
   return json;
+}
+
+function getGameId() {
+  return window.location.href.substring(window.location.href.lastIndexOf('/') + 1)
 }
 
 
