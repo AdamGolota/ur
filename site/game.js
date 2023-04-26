@@ -69,7 +69,7 @@ async function placeNewPiece() {
 document.getElementById('place-new-piece-button').addEventListener('click', placeNewPiece);
 
 async function roll() {
-  const response = await fetch(`/roll/v2`, { method: 'POST' });
+  const response = await fetch(`/roll`, { method: 'POST' });
   const { roll: result } = await response.json();
   drawRoll(result);
 }
@@ -168,7 +168,7 @@ function simplifyBoardModel(board) {
 }
 
 async function fetchGameState() {
-  const response = await fetch(`/game-state/v2`);
+  const response = await fetch(`/game-state`);
   const json = await response.json();
   return json;
 }
