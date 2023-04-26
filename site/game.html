@@ -5,13 +5,20 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="/index.css">
     <title>Document</title>
 </head>
 <body>
-    <div>
-        <div class="start-btn-container">
-          <button class="button-4" id="start-new-game-button">Start new game</button>
+    <div id="chess">
+        <div id="error" class="error"></div>
+        <div id="scores" class="scores"></div>
+        <div class="message" id="message"></div>
+        <div class="buttons-container">
+          <button class="button-3" id="roll-button">Roll</button>
+          <div class="roll-container" id="roll-container"></div>
+          <div>
+            <button class="button-4" id="place-new-piece-button">Place new piece</button>
+          </div>
         </div>
         <div id="wrap">
           
@@ -37,6 +44,6 @@
             </div> -->
         </div>
     </div>
-    <script src="index.js"></script>      
+    <script src="/game.js"></script>      
 </body>
 </html>
